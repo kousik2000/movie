@@ -78,7 +78,7 @@ app.put("/movies/:movieId/", async (request, response) => {
     movie
   SET
     director_id = '${directorId}',
-    movie_name = ${movieName},
+    movie_name = '${movieName}',
     lead_actor = '${leadActor}'
   WHERE
     movie_id = ${movieId};`;
@@ -109,14 +109,15 @@ app.get("/directors/", async (request, response) => {
 });
 
 app.get("/directors/:directorId/movies/", async (request, response) => {
+  const { directorId } = request.params;
   const getMoviesByDirector = `
-    SELECT movie.movieName
+    SELECT movie.movie_name as movieName
     FROM movie
     INNER JOIN director
     ON movie.director_id = director.director_id
-    WHERE director_id = ${directorId};`;
-
-  const director = await database.get(getMoviesByDirector);
-  response.send(convertDbObjectToResponseObject(director));
+    WHERE director.director_id = ${directorId};`;
+  const moviesArray = await database.all(getMoviesByDirector);
+  response.send(moviesArray);
 });
+
 module.exports = app;
